@@ -62,4 +62,10 @@ colnames(escolas) = c('id', 'escola', 'UF', 'cidade',
                       'media_30_CH', 'media_CH',
                       'media_30_CN', 'media_CN', 'ENEM_2014')
 
+## Ordenar pelo ENEM 2014
+escolas  = escolas %>% arrange(desc(ENEM_2014))
+
+## Colocando um ranking
+escolas$RANKING = 1:nrow(escolas)
+
 save('escolas', file = 'escolas.rda')
