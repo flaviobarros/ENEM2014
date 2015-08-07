@@ -36,6 +36,13 @@ shinyServer(function(input, output) {
                        selected = categorias[1])
   })
   
+  # Campo da escola
+  output$choose_escola <- renderUI({
+    
+    textInput('escola', 'Encontre sua escola:')
+    
+  })
+  
   
   # Output the data
   output$data_table <- renderTable({
@@ -48,6 +55,14 @@ shinyServer(function(input, output) {
     
     # Keep the selected columns
     dat <- dat[, colunas, drop = FALSE]
+    print(is.null(input$escola))
+    print(input$escola)
+    # Seleciona escola
+    if(!is.null(output$escola)) {
+      
+      dat = cbind(dat, escolas$escola)
+      dat = dat %>% filter(grepl(pattern = input$escola))
+    }
     
     # Tabela ordenada
     sorted_stats <- eval(substitute(dat %>% arrange(desc(col)), 
