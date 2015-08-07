@@ -14,7 +14,9 @@ shinyUI(pageWithSidebar(
   sidebarPanel(
     uiOutput("choose_indicator"),
     
-    uiOutput("choose_columns")
+    uiOutput("choose_columns"),
+    
+    uiOutput("choose_escola")
   ),
   
   
