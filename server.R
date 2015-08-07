@@ -55,10 +55,9 @@ shinyServer(function(input, output) {
     
     # Keep the selected columns
     dat <- dat[, colunas, drop = FALSE]
-    print(is.null(input$escola))
-    print(input$escola)
+  
     # Seleciona escola
-    if(!is.null(output$escola)) {
+    if((input$escola != '')) {
       
       dat = cbind(dat, escolas$escola)
       dat = dat %>% filter(grepl(pattern = input$escola))
