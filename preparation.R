@@ -49,4 +49,17 @@ medias = select(escolas, which(grepl(pattern = 'MÉDIA -',
 medias = medias[,-2]
 escolas$ENEM2014 = rowMeans(medias)
 
+## Definindo bons nomes de colunas
+colnames(escolas) = c('id', 'escola', 'UF', 'cidade', 
+                      'dep_administrativa', 'local', 'num_alunos',
+                      'porte_escola', 'participantes_enem', 'taxa_particip',
+                      'num_necessidades_especiais', 'ind_permanencia',
+                      'ind_nivel_socioeconomico', 'faixa', 'ind_form_docente',
+                      'taxa_aprovacao', 'taxa_reprovacao', 'taxa_abandono',
+                      'media_30_LC', 'media_LC',
+                      'media_30_RED', 'media_RED',
+                      'media_30_MAT', 'media_MAT',
+                      'media_30_CH', 'media_CH',
+                      'media_30_CN', 'media_CN', 'ENEM_2014')
+
 save('escolas', file = 'escolas.rda')
