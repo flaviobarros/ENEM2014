@@ -12,15 +12,15 @@ shinyUI(pageWithSidebar(
   headerPanel(""),
   
   sidebarPanel(
-    uiOutput("choose_indicator"),
+    uiOutput("choose_indicador"),
     
     uiOutput("choose_estado"),
     
     uiOutput("choose_cidade"),
     
-    uiOutput("choose_columns"),
+    uiOutput("choose_escola"),
     
-    uiOutput("choose_escola")
+    uiOutput("choose_columns")
   ),
   
   

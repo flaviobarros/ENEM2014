@@ -18,7 +18,8 @@ shinyServer(function(input, output) {
   
   # Drop-down selection box for which data set
   output$choose_indicator <- renderUI({
-    selectInput("indicador", "Selecione indicador", indicadores)
+    selectInput("indicador", "Selecione indicador", indicadores, 
+                selected = indicadores[length(indicadores)])
   })
   
   # Campo da estado
@@ -38,9 +39,14 @@ shinyServer(function(input, output) {
   # Campo da cidade
   output$choose_cidade <- renderUI({
     
-    cidades = escolas %>% select(UF, cidade) %>% 
-      filter(UF == input$estado) %>% select(cidade) %>% distinct(cidade)
-    
+    if(is.null(input$estado)) {
+      return()
+    }
+ 
+      
+      cidades = escolas %>% select(UF, cidade) %>% 
+        filter(UF == input$estado) %>% select(cidade) %>% distinct(cidade)
+   
     selectInput('cidade', 'Cidade', multiple = T,
                 choices = cidades, selected = 'SAO PAULO')
     
@@ -49,59 +55,85 @@ shinyServer(function(input, output) {
   # Campo da escola
   output$choose_escola <- renderUI({
     
-    escolas_cidade = escolas %>% select(escola, cidade, UF) %>%
-                     filter(UF == input$estado) %>% filter(cidade == input$cidade) %>%
-                     select(escola)
+    if (is.null(input$cidade)) {
+      
+      return()
+    } else if (is.null(input$estado)) {
+      
+      return()
+    }
+      
+      escolas_cidade = escolas %>% select(escola, cidade, UF) %>%
+        filter(UF == input$estado) %>% filter(cidade == input$cidade) %>%
+        select(escola)
+
     selectInput('escola', 'Encontre sua escola:', multiple = T,
                 choices = escolas_cidade)
     
   })
   
-  # Check boxes
-  output$choose_columns <- renderUI({
-    # If missing input, return to avoid error later in function
-    
-    # Get the data set with the appropriate name
-    # Obtendo colunas
-    tipos = sapply(escolas, class)
-    categorias = names(escolas)[!(tipos == 'numeric')]
-    
-    # Retirando as colunas UF, cidade e escola
-    retirar = c('UF', 'cidade', 'escola')
-    categorias = categorias[which(!(categorias %in% retirar))]
-    
-    # Create the checkboxes and select them all by default
-    selectInput("columns", "Choose columns", multiple = T,
-                choices  = categorias,
-                selected = categorias[1])
-  })
-  
-  
   # Output the data
   output$data_table <- renderTable({
     
-    # Get the data set
-    dat <- escolas
+    # Consultando a tabela
+    if (is.null(input$estado) || is.null(input$cidade)) {
+      
+      return()
+    }
     
-    # Pegando as colunas
-    colunas <- c(input$columns, input$indicador)
+    if (is.null(input$columns)) {
+      
+      dat = escolas %>% select(escola, cidade, UF, RANKING) %>%
+        filter(UF == input$estado) %>% filter(cidade == input$cidade) %>%
+        select(escola, RANKING)
+      
+        head(dat, 20)
     
-    # Keep the selected columns
-    dat <- dat[, colunas, drop = FALSE]
+    } else  if (is.null(input$escola)) {
+      
+      # Keep the selected columns
+      dat <- subset(escolas, select = c('escola', 'cidade', 'UF', input$columns), drop = F)
+      
+      # Filtrando cidade e estado
+      dat <- dat %>% 
+        filter(UF == input$estado) %>% filter(cidade == input$cidade) 
+      
+      head(dat, 20)
+      
+    } else {
+      
+      # Keep the selected columns
+      dat <- subset(escolas, select = c('escola', 'cidade', 'UF', input$columns), drop = F)
+      
+      dat = dat %>% 
+        filter(UF == input$estado) %>% filter(cidade == input$cidade) %>%
+        filter(escola %in% input$escola)
+      
+    }
+    
+      
+      
+    
+
+  })
   
-    # Seleciona escola
-#     print(input$escola)
-#     if((input$escola != '')) {
-#       
-#       dat = cbind(dat, escolas$escola)
-#       dat = dat %>% filter(grepl(pattern = input$escola, x=escola)) %>%
-#             select(which(colunas %in% colnames(dat)))
-#     }
+  # Check boxes
+  output$choose_columns <- renderUI({
     
-    # Tabela ordenada
-    sorted_stats <- eval(substitute(dat %>% arrange(desc(col)), 
-                                    list(col=as.symbol(input$indicador))))
-    # Return first 20 rows
-    head(sorted_stats, 20)
+    if (is.null(input$cidade)) {
+      
+      return()
+      
+    } else {
+      
+      tipo = sapply(escolas, class)
+      colunas = colnames(escolas)[tipo == 'numeric']
+      
+      # Create the checkboxes and select them all by default
+      checkboxGroupInput("columns", "Escolha os indices:", 
+                         choices  = colunas,
+                         selected = colunas[length(colunas)])
+    }
+      
   })
 })
